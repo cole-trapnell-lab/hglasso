@@ -1,4 +1,4 @@
-hbn <- function(X,lambda1,lambda2=100000,lambda3=100000,convergence=1e-8,maxiter=1000,start="cold",var.init=NULL,trace=FALSE){
+hbn <- function(X,lambda1,lambda2=100000,lambda3=100000,convergence=1e-8,maxiter=1000,start="cold",var.init=NULL,trace=FALSE, method="C"){
 
 # Checking arguments	
 if(lambda1<0) stop("tuning parameter cannot be negative!")
@@ -40,8 +40,18 @@ if(start!="cold" && start!="warm") stop("Invalid argument")
   while(criteria > convergence && i <= maxiter){
 	if(trace==TRUE && i%%10==0) print(paste("iteration = ",i,sep=""))
   	
-    Theta <- BB_logistic(X,tildeTheta-W1,rho)    
-
+    #Theta_R <- BB_logistic_R(X,tildeTheta-W1,rho)
+    if (method=="C"){
+      Theta <- BB_logistic(X,tildeTheta-W1,rho)
+    }else{
+      Theta <- BB_logistic_R(X,tildeTheta-W1,rho)
+    }
+    
+#     if (sum(colSums(is.nan(Theta))) > 0) {
+#       print (Theta)
+#       print (oldTheta)
+#       break;
+#     }
     Z<-updateZ(tildeZ,W3,lambda1,rho)	 
 
     V<-updateV(tildeV,W2,lambda2,lambda3,rho)

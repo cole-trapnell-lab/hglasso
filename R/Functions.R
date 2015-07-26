@@ -206,15 +206,14 @@ updateGamma <- function(Theta,V,Z,W1,W2,W3,rho){
 ######################################################
 # Returns gradient for logistic regression loss 
 ######################################################
-gradient_eval_symmetric <- function(Theta,Xhat,A,X,rho){
+gradient_eval_symmetric_R <- function(Theta,Xhat,A,X,rho){
 	p = nrow(Theta);
 	n = nrow(X);
 	grad <- array(0,c(p,p))
 
 	temp <- array(0,c(p,n))
-	temp <- exp(diag(Theta)%*%array(1,c(1,n)) + Theta%*%t(X) - diag(diag(Theta))%*%
-	t(X))/
-	(1 + exp(diag(Theta)%*%array(1,c(1,n)) + Theta%*%t(X) - diag(diag(Theta))%*%t(X)))
+	temp <- exp(diag(Theta)%*%array(1,c(1,n)) + Theta%*%t(X) - diag(diag(Theta))%*% t(X))/
+	   (1 + exp(diag(Theta)%*%array(1,c(1,n)) + Theta%*%t(X) - diag(diag(Theta))%*% t(X)))
 	
 	for (k in 1:p){
 		grad[k,] = -Xhat[k,] - t(Xhat[,k]) + 
@@ -242,7 +241,7 @@ gradient_eval_symmetric <- function(Theta,Xhat,A,X,rho){
 # Main algorithm to solve penalized logistic regression 
 # using Barzilai Borwein method
 ######################################################
-BB_logistic <- function(X,A,rho){
+BB_logistic_R <- function(X,A,rho){
 	Xhat <- t(X)%*%X;
 	
 	n  = nrow(X);
@@ -254,8 +253,8 @@ BB_logistic <- function(X,A,rho){
 
 	D <- array(0,c(p,p));
 	D_old <- array(0,c(p,p));
-	D_old <- gradient_eval_symmetric(Theta_old,Xhat,A,X,rho);
-
+	D_old <- gradient_eval_symmetric_R(Theta_old,Xhat,A,X,rho);
+	
 	S <- array(0,c(p,p));
 	Y <- array(0,c(p,p));
 	alpha_bb <- 0;
@@ -272,7 +271,7 @@ BB_logistic <- function(X,A,rho){
 	{
 		S <- Theta - Theta_old;
 		Theta_old <- Theta;
-		D <- gradient_eval_symmetric(Theta,Xhat,A,X,rho);
+		D <- gradient_eval_symmetric_R(Theta,Xhat,A,X,rho);
 		Y <- D - D_old;
 		D_old <- D;
 		
