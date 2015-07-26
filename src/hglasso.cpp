@@ -28,15 +28,9 @@ void gradient_eval_symmetric(const MatrixXd& Theta,
   int p = Theta.rows();
   int n = X.rows();
   
-  grad = MatrixXd::Zero(p, p);
+  grad = MatrixXd(p, p);
   
-  MatrixXd mat_temp = ArrayXXd::Zero(p, n);
-
-//   Rcpp::Rcout << n << " " << p << std::endl;
-//   Rcpp::Rcout << (Theta.diagonal() * MatrixXd::Constant(1, n, 1.0) + 
-//     (Theta * X.transpose())  - 
-//     Theta.diagonal().asDiagonal() * X.transpose()).array().exp() << std::endl;
-//   
+  MatrixXd mat_temp = ArrayXXd(p, n);
 
   MatrixXd theta_diag = MatrixXd::Zero(p, p);
   theta_diag.diagonal() = Theta.diagonal();
@@ -53,41 +47,17 @@ void gradient_eval_symmetric(const MatrixXd& Theta,
           theta_diag * X.transpose()).array().exp() + 1);
   temp /= mat_temp.array();
 
-
-//   Rcpp::Rcout << "Theta" << std::endl;
-//   Rcpp::Rcout << Theta << std::endl;
-//   Rcpp::Rcout << "X" << std::endl;
-//   Rcpp::Rcout << X << std::endl;
-//  Rcpp::Rcout << "temp" << std::endl;
-//  Rcpp::Rcout <<  temp << std::endl;
-  
   for (size_t k = 0; k < p; ++k)
   {
-// 
-//     grad[k,] = -Xhat[k,] - t(Xhat[,k]) + 
-//       colSums(t( array(rep( exp(Theta[k,k] + Theta[k,]%*%t(X) - 
-//       Theta[k,k]%*%t(X[,k]) ) /
-//                               (1 + exp(Theta[k,k] + Theta[k,]%*%t(X) - 
-//                                 Theta[k,k]%*%t(X[,k])) ), each = p), c(p,n) )*t(X) )) +
-//                                 colSums(t(temp*array( rep(t(X[,k]),each = p), c(p,n)))) + 
-//                                 rho*(Theta[k,] - A[k,]) + rho*(t(Theta[,k]) - t(A[,k]));
-//     
-    //Rcpp::Rcout << "*&&&&&&&&" << std::endl;
-    //Rcpp::Rcout <<  (Theta.row(k) * X.transpose()) - (X.col(k).transpose() * Theta(k,k)) << std::endl;
-    
     VectorXd rep_elm = ( (  Theta.row(k) * X.transpose() - X.col(k).transpose() * Theta(k,k)).array() + Theta(k,k)).exp() /
                        ( ( (Theta.row(k) * X.transpose() - X.col(k).transpose() * Theta(k,k)).array() + Theta(k,k)).exp() + 1);
-    
-    //Rcpp::Rcout << "****" << std::endl;
-    //Rcpp::Rcout << rep_elm.sum() << std::endl;
+
     ArrayXXd temp_mat(p, n);
     for (size_t j = 0; j < p; j++){
       temp_mat.row(j) = rep_elm;
     }
     temp_mat *= X.transpose().array();
-    
-    //break;
-    
+
     ArrayXXd temp_mat2(p, n);
     for (size_t j = 0; j < p; j++){
       temp_mat2.row(j) = X.col(k).transpose();
@@ -95,52 +65,21 @@ void gradient_eval_symmetric(const MatrixXd& Theta,
     
     VectorXd grad_row_tmp = temp_mat.transpose().colwise().sum() + 
                             (temp*temp_mat2).transpose().colwise().sum();
-    
-//     if (isnan(grad_row_tmp.sum())) {
-//       Rcpp::Rcout << "*********" << std::endl;
-//       Rcpp::Rcout << temp_mat << std::endl;
-//       Rcpp::Rcout << "***" << std::endl;
-//       Rcpp::Rcout << temp_mat2 << std::endl;
-//       Rcpp::Rcout << "!!!!" << std::endl;
-//       Rcpp::Rcout << temp << std::endl;
-//     }
-//     
-    //Rcpp::Rcout << "*********" << std::endl;
-    //Rcpp::Rcout <<  grad_row_tmp  << std::endl;
+
     grad_row_tmp +=  -Xhat.row(k) - Xhat.col(k).transpose(); 
-    //Rcpp::Rcout << "***" << std::endl;
-    //Rcpp::Rcout <<   -Xhat.row(k) - Xhat.col(k).transpose()  << std::endl;
+
     grad_row_tmp += (Theta.row(k) - A.row(k))*rho + (Theta.col(k).transpose() - A.col(k).transpose())*rho;
-    //Rcpp::Rcout << "***" << std::endl;
-    //Rcpp::Rcout <<  (Theta.row(k) - A.row(k))*rho + (Theta.col(k).transpose() - A.col(k).transpose())*rho  << std::endl;
-    
+
     grad.row(k) = grad_row_tmp;
-    //break;
-    //Rcpp::Rcout << "*********" << std::endl;
-    //Rcpp::Rcout <<  grad.row(k)  << std::endl;
-    //break;
-    
-  //     grad[k,k] = -Xhat[k,k] + colSums(t( exp(Theta[k,k] + Theta[k,]%*%t(X) -
-//       Theta[k,k]%*%t(X[,k]) ) /
-//                                           (1 + exp(Theta[k,k] + Theta[k,]%*%t(X) -
-//                                             Theta[k,k]%*%t(X[,k]))) )) + 
-//                                             rho*(Theta[k,k] - A[k,k]);
 
     ArrayXd vec_row_tmp = (  (Theta.row(k) * X.transpose() - X.col(k).transpose() * Theta(k,k)).array() + Theta(k,k)).array().exp();
     vec_row_tmp /= (  (  (Theta.row(k) * X.transpose() - X.col(k).transpose() * Theta(k,k)).array() + Theta(k,k)).array().exp() + 1);
-    
-    //Rcpp::Rcout << "***" << std::endl;
-    //Rcpp::Rcout << vec_row_tmp << std::endl;
+
     double update_k = vec_row_tmp.sum() + 
                       rho*(Theta(k,k) - A(k,k)) - Xhat(k,k);
-//     Rcpp::Rcout << "&&&&" << std::endl;
-//      Rcpp::Rcout << (  (Theta.row(k) * X.transpose() - X.col(k).transpose() * Theta(k,k)).array() + Theta(k,k)).array().exp()  << std::endl;
-//      Rcpp::Rcout << (  (  (Theta.row(k) * X.transpose() - X.col(k).transpose() * Theta(k,k)).array() + Theta(k,k)).array().exp() + 1) << std::endl;
-    //  Rcpp::Rcout << vec_row_tmp.sum() << std::endl;
-    //  Rcpp::Rcout << rho*(Theta(k,k) - A(k,k)) << std::endl;
-    //  Rcpp::Rcout << -Xhat(k,k) << std::endl;
-     grad(k,k) = update_k;
-      //break;
+
+    grad(k,k) = update_k;
+
   }
   
   
@@ -158,13 +97,13 @@ void BB_logistic_cpp(const MatrixXd& X, const MatrixXd& A, const double& rho,
   
   MatrixXd Theta_old = 2 * Theta;
   
-  MatrixXd D = MatrixXd::Zero(p, p);
-  MatrixXd D_old = MatrixXd::Zero(p, p);
+  MatrixXd D = MatrixXd(p, p);
+  MatrixXd D_old = MatrixXd(p, p);
   
   gradient_eval_symmetric(Theta_old, Xhat, A, X, rho, D_old);
   
-  MatrixXd S = MatrixXd::Zero(p, p);
-  MatrixXd Y = MatrixXd::Zero(p, p);
+  MatrixXd S = MatrixXd(p, p);
+  MatrixXd Y = MatrixXd(p, p);
   double alpha_bb = 0.0;
   
   // Algorithm parameters
