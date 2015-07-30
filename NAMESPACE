@@ -1,4 +1,4 @@
-export(hglasso, hcov, hbn, HubNetwork, binaryMCMC, plot.hglasso, image.hglasso, summary.hglasso, plot.hcov, image.hcov, summary.hcov, plot.hbn, image.hbn, summary.hbn,hglassoBIC)
+export(hglasso, hcov, hbn, HubNetwork, binaryMCMC, plot.hglasso, image.hglasso, summary.hglasso, plot.hcov, image.hcov, summary.hcov, plot.hbn, image.hbn, summary.hbn,hglassoBIC, hbnBIC, pseudo_ll)
 S3method(plot, hglasso)
 S3method(image, hglasso)
 S3method(print, hglasso)

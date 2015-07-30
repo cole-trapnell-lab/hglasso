@@ -1,6 +1,6 @@
 pseudo_ll <- function(x, theta) {
 	n <- nrow(x)
-	p <- ncol(X)
+	p <- ncol(x)
 	part1 <- 0
 	XtX <- t(x) %*% x
 	for (j in 1:p) {
@@ -23,15 +23,4 @@ pseudo_ll <- function(x, theta) {
 		}
 	}
 	part1 - part2
-}
-hbnBIC <- function(hbn_object, theta, S = NULL) {
-	n <- hbn_object$n	
-	v <- length(hbn_object$hubind)	
-	Zcard <- (sum(abs(hbn_object$Z)!=0)-hbn_object$p)/2
-	Vcard <- hbn_object$V+t(x$V)
-	diag(Vcard) <- 0
-	Vcard <- sum(Vcard!=0)/2
-	if (is.null(S)) S <- cov(x)
-
-	return(list(BIC=-n*(pseudo_ll(x, theta))+sum(diag(S%*%x$Theta)))+log(n)*Zcard + log(n)*(v+c*(Vcard-v)))
 }
