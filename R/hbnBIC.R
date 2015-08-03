@@ -6,5 +6,5 @@ hbnBIC <- function(hbn_object, data, S = NULL, c=0.2) {
         diag(Vcard) <- 0
         Vcard <- sum(Vcard!=0)/2
         if (is.null(S)) S <- cov(data)
-        return(list(BIC=-2*(pseudo_ll(data, hbn_object$Theta))+n*sum(diag(S%*%hbn_object$Theta))+log(n)*Zcard + log(n)*(v+c*(Vcard-v))))
+	return(list(BIC=-2*(pseudo_ll(data, hbn_object$Theta))+log(n)*Zcard))
 }
